@@ -229,7 +229,6 @@ func (o *observer) writeStatus(obv *observation) error {
 		}
 
 		conn.Send("HMSET", args...)
-		conn.Send("EXPIRE", key, 60*60*24)
 		if err := conn.Flush(); err != nil {
 			return err
 		}
