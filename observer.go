@@ -3,6 +3,8 @@ package work
 import (
 	"encoding/json"
 	"fmt"
+	"os"
+	"strconv"
 	"time"
 
 	"github.com/gomodule/redigo/redis"
@@ -229,7 +231,15 @@ func (o *observer) writeStatus(obv *observation) error {
 		}
 
 		conn.Send("HMSET", args...)
-		conn.Send("EXPIRE", key, 60*60*24)
+		expire := 60 * 60 * 24
+		duration := os.Getenv("MAX_JOB_DURATION_SECONDS")
+		if len(duration) > 0 {
+			durationInt, err := strconv.Atoi(duration)
+			if err == nil {
+				expire = durationInt
+			}
+		}
+		conn.Send("EXPIRE", key, expire)
 		if err := conn.Flush(); err != nil {
 			return err
 		}
